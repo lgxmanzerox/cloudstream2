@@ -1,4 +1,4 @@
-                name: Build Android APK (assembleStableRelease · arm64-v8a)
+                name: Build Android APK (assembleRelease · armeabi-v7a)
 
                 on:
                   push:
@@ -30,7 +30,7 @@
                       - name: Setup Gradle
                         uses: gradle/actions/setup-gradle@v4
                 
-- name: Configure single ABI filter (arm64-v8a) to reduce APK size
+- name: Configure single ABI filter (armeabi-v7a) to reduce APK size
   run: |
     cat << 'EOF' > abi-filter.init.gradle
     allprojects {
@@ -38,13 +38,13 @@
             if (project.plugins.hasPlugin("com.android.application")) {
                 try {
                     project.android.defaultConfig.ndk.abiFilters.clear()
-                    project.android.defaultConfig.ndk.abiFilters.add("arm64-v8a")
+                    project.android.defaultConfig.ndk.abiFilters.add("armeabi-v7a")
                 } catch (ignored) {}
                 try {
                     project.android.splits.abi {
                         enable = true
                         reset()
-                        include("arm64-v8a")
+                        include("armeabi-v7a")
                         universalApk = false
                     }
                 } catch (ignored) {}
@@ -53,19 +53,19 @@
     }
     EOF
 
-                      - name: Build APK (assembleStableRelease)
+                      - name: Build APK (assembleRelease)
                         run: |
                           if [ -f ./gradlew ]; then
                             chmod +x ./gradlew
-                            ./gradlew assembleStableRelease -Pandroid.injected.build.abi=arm64-v8a --init-script abi-filter.init.gradle --no-daemon --stacktrace
+                            ./gradlew assembleRelease -Pandroid.injected.build.abi=armeabi-v7a --init-script abi-filter.init.gradle --no-daemon --stacktrace
                           else
-                            gradle assembleStableRelease -Pandroid.injected.build.abi=arm64-v8a --init-script abi-filter.init.gradle --no-daemon --stacktrace
+                            gradle assembleRelease -Pandroid.injected.build.abi=armeabi-v7a --init-script abi-filter.init.gradle --no-daemon --stacktrace
                           fi
 
                       - name: Upload APK artifact
                         uses: actions/upload-artifact@v4
                         with:
-                          name: app-apk-arm64-v8a
+                          name: app-apk-armeabi-v7a
                           path: |
                             **/build/outputs/apk/*release*/*.apk
                             **/build/outputs/apk/**/*.apk

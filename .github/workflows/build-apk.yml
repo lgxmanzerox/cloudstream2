@@ -1,4 +1,4 @@
-name: Build Android APK (assembleRelease · armeabi-v7a)
+name: Build Android APK (Stable Release · armeabi-v7a)
 
 on:
   push:
@@ -30,46 +30,41 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Configure ABI filter and Release Signing
+      - name: Configure Release Signing and ABI Split
         run: |
           cat << 'EOF' > custom-build.init.gradle
           allprojects {
               afterEvaluate { project ->
                   if (project.plugins.hasPlugin("com.android.application")) {
-                      try {
-                          // 1. إجبار نسخة الـ Release على استخدام مفتاح الديباج
-                          project.android.buildTypes.release.signingConfig = project.android.signingConfigs.debug
-                          
-                          // 2. تصفية المعمارية إلى armeabi-v7a فقط
-                          project.android.defaultConfig.ndk.abiFilters.clear()
-                          project.android.defaultConfig.ndk.abiFilters.add("armeabi-v7a")
-                          
-                          project.android.splits.abi {
-                              enable = true
-                              reset()
-                              include("armeabi-v7a")
-                              universalApk = false
-                          }
-                      } catch (ignored) {}
+                      // 1. إجبار نسخة الـ Release على استخدام مفتاح الديباج
+                      project.android.buildTypes.release.signingConfig = project.android.signingConfigs.debug
+                      
+                      // 2. تصفية المعمارية إلى armeabi-v7a فقط (بدون تعارض)
+                      project.android.splits.abi {
+                          enable = true
+                          reset()
+                          include("armeabi-v7a")
+                          universalApk = false
+                      }
                   }
               }
           }
           EOF
 
-      - name: Build APK (assembleRelease)
+      - name: Build Stable Release APK
         run: |
           if [ -f ./gradlew ]; then
             chmod +x ./gradlew
-            ./gradlew assembleRelease --init-script custom-build.init.gradle --no-daemon --stacktrace
+            ./gradlew assembleStableRelease --init-script custom-build.init.gradle --no-daemon --stacktrace
           else
-            gradle assembleRelease --init-script custom-build.init.gradle --no-daemon --stacktrace
+            gradle assembleStableRelease --init-script custom-build.init.gradle --no-daemon --stacktrace
           fi
 
-      - name: Upload APK artifact
+      - name: Upload Release APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-apk-armeabi-v7a
+          name: app-stable-release-armeabi-v7a
           path: |
-            **/build/outputs/apk/*release*/*.apk
+            **/build/outputs/apk/stable/release/*.apk
             **/build/outputs/apk/**/*.apk
           if-no-files-found: error

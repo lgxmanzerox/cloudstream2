@@ -104,7 +104,8 @@ android {
 
     defaultConfig {
         applicationId = "com.lagradost.cloudstream3"
-        minSdk = libs.versions.minSdk.get().toInt()
+        // Android 6.0 (Marshmallow, API 23) support
+        minSdk = 23
         targetSdk = libs.versions.targetSdk.get().toInt()
         versionCode = libs.versions.versionCode.get().toInt()
         versionName = libs.versions.versionName.get()

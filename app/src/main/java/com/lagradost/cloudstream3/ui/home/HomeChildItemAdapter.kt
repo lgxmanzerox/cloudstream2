@@ -128,16 +128,9 @@ open class HomeChildItemAdapter(
         }
 
     private fun updateCachedPosterSize() {
-        setWidth = if (!isHorizontal) {
-            minPosterSize
-        } else {
-            maxPosterSize
-        }
-        setHeight = if (!isHorizontal) {
-            maxPosterSize
-        } else {
-            minPosterSize
-        }
+        // YouTube-style 16:9 widescreen video thumbnail dimensions
+        setWidth = maxPosterSize
+        setHeight = minPosterSize
     }
 
     init {
@@ -170,10 +163,10 @@ open class HomeChildItemAdapter(
         fun updatePosterSize(context: Context, value: Int? = null) {
             val scale = value ?: PreferenceManager.getDefaultSharedPreferences(context)
                 ?.getInt(context.getString(R.string.poster_size_key), 0) ?: 0
-            // Scale by +10% per step
+            // Scale by +10% per step, using YouTube 16:9 widescreen base (256dp x 144dp)
             val mul = 1.0f + scale * 0.1f
-            minPosterSize = (114.toPx.toFloat() * mul).toInt()
-            maxPosterSize = (180.toPx.toFloat() * mul).toInt()
+            minPosterSize = (144.toPx.toFloat() * mul).toInt()
+            maxPosterSize = (256.toPx.toFloat() * mul).toInt()
         }
 
         fun updateLayoutParms(layout: FrameLayout, width: Int, height: Int) {
